@@ -1,26 +1,150 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* --- カラー（DESIGN_SPEC 正規名） --- */
+  --color-bg:        #F0EEE9;
+  --color-paper:     #FFFFFF;
+  --color-surface:   #FBF8F1;
+  --color-rule:      #E6E0D2;
+  --color-ink:       #1B1A17;
+  --color-ink-sub:   #3A372F;
+  --color-mute:      #807A6E;
+  --color-faint:     #B4AEA0;
+  --color-accent:    #E27A2D;
+  --color-marker:    #FFF6BE;
+
+  /* 互換エイリアス — コンポーネント整備時に削除 */
+  --color-ink-soft:  #3A372F;
+  --color-mute-soft: #B4AEA0;
+  --color-highlight: #FFF6BE;
+  --color-surface2:  #F1ECDF;  /* DESIGN_SPEC 外。コンポーネント使用中 */
+
+  /* --- フォント（DESIGN_SPEC 正規名） --- */
+  --font-serif:    var(--font-noto-serif),   "Noto Serif JP",  "Hiragino Mincho ProN", Georgia, serif;
+  --font-sans:     var(--font-noto-sans),    "Noto Sans JP",   -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
+  --font-display:  var(--font-bebas),        "Bebas Neue",     "Oswald", Impact, sans-serif;
+  --font-mono:     var(--font-jetbrains),    "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  /* 互換エイリアス — コンポーネント整備時に削除 */
+  --font-heading:  var(--font-bebas),        "Bebas Neue",     "Oswald", Impact, sans-serif;
+
+  /* --- 角丸 --- */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* --- 影（DESIGN_SPEC 正規） --- */
+  --shadow-card:       0 1px 6px rgba(0,0,0,0.04);
+  --shadow-float:      0 6px 16px rgba(0,0,0,0.15);
+  --shadow-float-soft: 0 6px 24px rgba(0,0,0,0.08);
+
+  /* DESIGN_SPEC 外 — 後で整理 */
+  --shadow-hard: 4px 4px 0 #1B1A17;
+  --shadow-pop:  0 8px 28px rgba(0,0,0,.18);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Tiptap エディタ本文スタイル ─── */
+/*
+  CSS specificity strategy:
+  - .tiptap > * (0,1,0)  : resets browser default margins on all direct children
+  - .tiptap > * + * (0,1,0): paragraph spacing; same spec as above so later wins
+  - .tiptap h2 (0,1,1)   : heading margins; higher spec, always wins
+  - .tiptap h2 + * (0,1,1): post-heading tight gap; higher spec, wins over > * + *
+*/
+.tiptap {
+  outline: none;
+  font-family: var(--font-serif);
+  font-size: 1.0625rem; /* 17px — matches editor-desktop mock */
+  color: var(--color-ink);
+  line-height: 1.9;
+}
+/* Reset browser default block margins */
+.tiptap > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+/* Default gap between siblings (0,1,0) */
+.tiptap > * + * {
+  margin-top: 1rem;
+}
+/* Headings — specificity (0,1,1) overrides the rule above */
+.tiptap h1 {
+  font-size: 2.25rem;   /* 36px — matches editor-desktop H1 */
+  font-weight: 500;
+  line-height: 1.25;
+}
+.tiptap h2 {
+  font-size: 1.5rem;    /* 24px — matches editor-desktop H2 */
+  font-weight: 500;
+  line-height: 1.4;
+  margin-top: 2.5rem;
+}
+.tiptap h3 {
+  font-size: 1.125rem;  /* 18px */
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: 2rem;
+}
+/* Gap after headings (0,1,1): h1 gets more breathing room */
+.tiptap h1 + * { margin-top: 1rem; }
+.tiptap h2 + *,
+.tiptap h3 + * { margin-top: 0.5rem; }
+.tiptap strong { font-weight: 700; }
+.tiptap em     { font-style: italic; }
+.tiptap mark {
+  background-color: var(--color-marker);
+  color: var(--color-ink);
+  border-radius: 2px;
+  padding: 0 0.1em;
+}
+.tiptap ul { list-style-type: disc;    padding-left: 1.5rem; }
+.tiptap ol { list-style-type: decimal; padding-left: 1.5rem; }
+.tiptap li { line-height: 1.9; }
+.tiptap li + li { margin-top: 0.25rem; }
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--color-rule);
+  margin: 1.5rem 0;
+}
+.tiptap code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  padding: 0.1em 0.3em;
+}
+
+/* ─── Blockquote: DESIGN_SPEC accent-left + muted serif ─── */
+.tiptap blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 1.25rem;
+  margin-left: 0;
+  color: var(--color-mute);
+}
+.tiptap blockquote p {
+  font-style: italic;
+}
+
+/* ─── Lists ─── */
+.tiptap ul > li::marker { color: var(--color-faint); }
+.tiptap ol > li::marker { color: var(--color-faint); font-family: var(--font-mono); font-size: 0.875rem; }
+
+/* ─── Placeholder (Tiptap extension-placeholder) ─── */
+.tiptap .is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-faint);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  font-style: normal;
 }

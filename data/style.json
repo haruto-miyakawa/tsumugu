@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-19T15:43:29.561Z",
+  "tone": {
+    "formality": "casual",
+    "humor": "light",
+    "perspective": "first_person",
+    "enthusiasm": "moderate",
+    "description": ""
+  },
+  "structure": {
+    "opening": "anecdote",
+    "closing": "reflection",
+    "headingFrequency": "moderate",
+    "paragraphLength": "medium",
+    "usesBulletPoints": false,
+    "usesNumberedLists": false,
+    "typicalSections": []
+  },
+  "vocabulary": {
+    "preferredExpressions": [],
+    "avoidedExpressions": [],
+    "jargonLevel": "some",
+    "emojiUsage": "minimal"
+  },
+  "noteSpecific": {
+    "targetLength": 2000,
+    "hashTags": [],
+    "categoryHint": ""
+  }
+}
