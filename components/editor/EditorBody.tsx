@@ -5,8 +5,8 @@ import { useState } from "react";
 import { ArticleData } from "@/types/article";
 import { EditorUpdateData } from "@/types/editor";
 import { markdownToHtml } from "@/lib/markdown";
+import type { Editor } from "@tiptap/react";
 
-// dynamic import at module level (Next.js requirement for code-splitting to work)
 const RichEditor = dynamic(
   () => import("./RichEditor").then((m) => m.RichEditor),
   {
@@ -23,24 +23,20 @@ interface Props {
   article: ArticleData;
   isMobile?: boolean;
   onUpdate: (data: EditorUpdateData) => void;
+  onEditorReady?: (editor: Editor) => void;
+  onAiFocus?: () => void;
 }
 
-export function EditorBody({ article, isMobile, onUpdate }: Props) {
-  // Lazy initializer: convert markdown → HTML once on mount.
-  // Title is included as the first H1 node — no separate title display needed.
+export function EditorBody({ article, isMobile, onUpdate, onEditorReady, onAiFocus }: Props) {
   const [initialHtml] = useState(() => markdownToHtml(article.output.markdown));
 
   const kicker = [
     article.input.genre?.toUpperCase(),
     article.input.theme.slice(0, 28).toUpperCase(),
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  ].filter(Boolean).join(" · ");
 
   const date = new Date(article.updatedAt).toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+    year: "numeric", month: "long", day: "numeric",
   });
 
   const tags = [article.input.genre, "#つむぐで書いた"].filter(
@@ -56,6 +52,8 @@ export function EditorBody({ article, isMobile, onUpdate }: Props) {
         tags={tags}
         isMobile={isMobile}
         onUpdate={onUpdate}
+        onEditorReady={onEditorReady}
+        onAiFocus={onAiFocus}
       />
     </div>
   );
