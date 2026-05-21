@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 const NAV = [
   { href: "/",        label: "ホーム" },
   { href: "/generate", label: "エディタ" },
-  { href: "/format",  label: "ライブラリ" },
+  { href: "/library", label: "ライブラリ" },
   { href: "/style",   label: "スタイル" },
 ];
 
@@ -36,7 +36,7 @@ export function Header() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
           {NAV.map(({ href, label }) => {
-            const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+            const active = pathname === href || (href !== "/" && (pathname.startsWith(href) || (href === "/library" && pathname.startsWith("/preview"))));
             return (
               <Link
                 key={href}

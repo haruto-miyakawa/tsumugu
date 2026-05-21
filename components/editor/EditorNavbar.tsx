@@ -62,7 +62,7 @@ export function EditorNavbar({ title, charCount, articleId, status, saveStatus }
       {/* Actions */}
       <div className="flex items-center gap-2 shrink-0">
         <Link
-          href={`/format/${articleId}`}
+          href={`/preview/${articleId}`}
           className="hidden md:flex items-center text-[13px] font-sans font-medium text-ink-sub border border-rule px-3 py-1.5 rounded-sm hover:text-ink hover:bg-surface transition-colors"
         >
           プレビュー

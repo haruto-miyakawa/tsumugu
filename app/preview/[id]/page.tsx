@@ -1,0 +1,305 @@
+"use client";
+
+import { use, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { ArticleData, ArticleImage } from "@/types/article";
+import { FormatPreview } from "@/components/format/FormatPreview";
+import { ImageManager } from "@/components/format/ImageManager";
+import { Card } from "@/components/ui/Card";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { Tsumugi } from "@/components/ui/Tsumugi";
+import { markdownToHtml } from "@/lib/markdown";
+
+type PlacementInfo = { afterHeading: string; altText: string; reason: string };
+
+// ── Styles injected directly — avoids Turbopack dev-cache stale issues ────────
+// Production also gets these via globals.css .note-body rules (belt-and-suspenders).
+const NOTE_BODY_CSS = `
+.nb {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  color: var(--color-ink);
+  line-height: 2;
+}
+.nb > * { margin-top: 0; margin-bottom: 0; }
+.nb > * + * { margin-top: 1.5rem; }
+.nb h1 { display: none; }
+.nb h2 {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin-top: 3rem;
+}
+.nb h3 {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: 2rem;
+}
+.nb h2 + *, .nb h3 + * { margin-top: 0.75rem; }
+.nb strong { font-weight: 700; }
+.nb em     { font-style: italic; }
+.nb p      { font-family: var(--font-serif); }
+.nb blockquote {
+  border-left: 3px solid var(--color-accent);
+  padding-left: 1.25rem;
+  margin-left: 0;
+  color: var(--color-mute);
+}
+.nb blockquote p { font-style: italic; }
+.nb ul { list-style-type: disc;    padding-left: 1.75rem; }
+.nb ol { list-style-type: decimal; padding-left: 1.75rem; }
+.nb li { font-family: var(--font-serif); line-height: 2; }
+.nb li + li { margin-top: 0.25rem; }
+.nb hr {
+  border: none;
+  border-top: 1px solid var(--color-rule);
+  margin: 2.5rem 0;
+}
+.nb code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  padding: 0.1em 0.3em;
+}
+`;
+
+// Strip the leading H1 (shown as a separate large heading above the body)
+function getBodyMarkdown(md: string): string {
+  const lines = md.split("\n");
+  if (lines[0]?.startsWith("# ")) {
+    return lines.slice(lines[1] === "" ? 2 : 1).join("\n");
+  }
+  return md;
+}
+
+// ~500 chars/min for Japanese reading
+function calcReadTime(md: string): number {
+  const chars = md.replace(/[#*`_>\-\[\]()\n]/g, "").length;
+  return Math.max(1, Math.ceil(chars / 500));
+}
+
+export default function PreviewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const [article, setArticle]         = useState<ArticleData | null>(null);
+  const [isFormatting, setIsFormatting] = useState(false);
+  const [toast, setToast]             = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/articles/${id}`).then((r) => r.json()).then(setArticle);
+  }, [id]);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleFormat = async () => {
+    setIsFormatting(true);
+    try {
+      const res = await fetch(`/api/articles/${id}/format`, { method: "POST" });
+      setArticle(await res.json() as ArticleData);
+    } finally {
+      setIsFormatting(false);
+    }
+  };
+
+  const handleCopied = async () => {
+    await fetch(`/api/articles/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "copied" }),
+    });
+    setArticle((p) => p ? { ...p, status: "copied" } : p);
+    showToast("クリップボードにコピーしました");
+  };
+
+  const handleImageUploaded = (image: ArticleImage, suggestion: PlacementInfo) => {
+    setArticle((p) => p ? { ...p, images: [...p.images, image] } : p);
+    showToast(`「${image.originalName}」→「${suggestion.afterHeading}」の後に配置提案しました`);
+  };
+
+  const bodyHtml = useMemo(
+    () => (article ? markdownToHtml(getBodyMarkdown(article.output.markdown)) : ""),
+    [article]
+  );
+
+  if (!article) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  const kicker = [
+    article.input.genre?.toUpperCase(),
+    article.input.theme.slice(0, 28).toUpperCase(),
+  ].filter(Boolean).join(" · ");
+
+  const publishedDate = new Date(article.updatedAt).toLocaleDateString("ja-JP", {
+    year: "numeric", month: "long", day: "numeric",
+  });
+
+  const readTime = calcReadTime(article.output.markdown);
+
+  return (
+    <>
+      {/* Inject note-body styles — works in both dev and prod */}
+      {/* eslint-disable-next-line react/no-danger */}
+      <style dangerouslySetInnerHTML={{ __html: NOTE_BODY_CSS }} />
+
+      <div className="min-h-screen bg-bg">
+
+        {/* ── Preview sub-bar ── */}
+        <div className="sticky top-[68px] z-30 bg-paper border-b border-rule">
+          <div className="max-w-[760px] mx-auto px-5 md:px-6 h-11 flex items-center justify-between gap-3">
+
+            {/* Left: note風ロゴ + プレビューラベル */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Link href="/" className="flex items-center gap-1 hover:opacity-80 transition-opacity shrink-0">
+                <span className="font-display text-[22px] leading-none text-ink tracking-wide">
+                  つむぐ
+                </span>
+              </Link>
+              <span className="text-faint text-[13px] font-sans">·</span>
+              <span className="text-[12px] font-sans text-mute">
+                プレビュー
+              </span>
+            </div>
+
+            {/* Right: actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="hidden sm:inline text-[10px] font-mono bg-surface border border-rule px-2 py-0.5 rounded-sm text-mute">
+                下書き
+              </span>
+              <Link
+                href={`/editor/${id}`}
+                className="text-[12px] font-sans text-ink-sub border border-rule px-3 py-1 rounded-sm hover:bg-surface transition-colors"
+              >
+                エディタに戻る
+              </Link>
+              <button
+                disabled
+                className="flex items-center gap-1 text-[12px] font-sans text-paper bg-accent px-3 py-1 rounded-sm opacity-50 cursor-not-allowed"
+              >
+                noteに公開
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-3.5 h-3.5">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Toast */}
+        {toast && (
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-ink text-paper text-[13px] font-sans px-5 py-2.5 rounded-md shadow-float whitespace-nowrap">
+            {toast}
+          </div>
+        )}
+
+        {/* ── Article area ── */}
+        <div className="max-w-[760px] mx-auto px-5 md:px-6 py-10 md:py-14">
+
+          {/* Genre kicker */}
+          {kicker && (
+            <p className="font-mono text-[10px] tracking-[0.2em] text-mute uppercase mb-8">
+              {kicker}
+            </p>
+          )}
+
+          {/* Header image placeholder */}
+          <div className="w-full aspect-[760/320] bg-surface border border-rule rounded-md mb-10 flex flex-col items-center justify-center gap-2 select-none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="w-8 h-8 text-faint">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <p className="font-mono text-[10px] tracking-widest text-faint uppercase">
+              ヘッダー画像
+            </p>
+          </div>
+
+          {/* Article title */}
+          <h1 className="font-serif text-[2.25rem] md:text-[2.5rem] font-medium text-ink leading-[1.25] mb-7">
+            {article.output.selectedTitle}
+          </h1>
+
+          {/* Author row */}
+          <div className="flex items-center gap-3 mb-10 pb-8 border-b border-rule">
+            <div className="w-10 h-10 rounded-full bg-surface border border-rule flex items-center justify-center shrink-0 overflow-hidden">
+              <Tsumugi size={28} mood="idle" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-sans font-medium text-ink">あなた</p>
+              <p className="text-[11px] font-mono text-mute mt-0.5">
+                {publishedDate}&nbsp;·&nbsp;約{readTime}分
+              </p>
+            </div>
+            <button className="text-[12px] font-sans text-ink border border-rule px-4 py-1.5 rounded-full hover:bg-surface transition-colors shrink-0">
+              フォロー
+            </button>
+          </div>
+
+          {/* ── Article body ── */}
+          <div className="nb" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+
+          {/* Bottom author strip */}
+          <div className="mt-16 pt-10 border-t border-rule flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-surface border border-rule flex items-center justify-center shrink-0">
+              <Tsumugi size={20} mood="happy" />
+            </div>
+            <div>
+              <p className="text-[12px] font-sans font-medium text-ink">あなた</p>
+              <p className="text-[11px] font-sans text-mute">つむぐで書きました</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── NOTE 準備ツール（旧 /format/[id] の機能） ── */}
+        <div className="border-t-2 border-rule bg-surface">
+          <div className="max-w-[760px] mx-auto px-5 md:px-6 py-10">
+            <p className="font-mono text-[10px] tracking-widest text-mute uppercase mb-6">
+              NOTE 準備ツール
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <div className="lg:col-span-2">
+                <Card kicker="FORMAT" title="整形・コピー">
+                  <FormatPreview
+                    article={article}
+                    onFormat={handleFormat}
+                    onCopied={handleCopied}
+                    isFormatting={isFormatting}
+                  />
+                </Card>
+              </div>
+
+              <div className="space-y-5">
+                <Card kicker="IMAGES" title="画像配置">
+                  <p className="text-sm text-mute mb-4 leading-relaxed">
+                    画像をアップロードするとAIが最適な配置場所を提案します。
+                  </p>
+                  <ImageManager article={article} onImageUploaded={handleImageUploaded} />
+                </Card>
+
+                {article.status === "copied" && (
+                  <div className="flex flex-col items-center gap-3 py-6 text-center bg-paper border border-rule rounded-md">
+                    <Tsumugi size={52} mood="happy" />
+                    <p className="text-sm font-serif text-mute">noteに貼り付け準備完了！</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </>
+  );
+}

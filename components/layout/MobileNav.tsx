@@ -22,7 +22,7 @@ const TABS = [
     ),
   },
   {
-    href: "/format",
+    href: "/library",
     label: "整形",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -82,7 +82,7 @@ export function MobileNav() {
       </Link>
 
       {TABS.slice(2).map(({ href, label, icon }) => {
-        const active = pathname.startsWith(href);
+        const active = pathname.startsWith(href) || (href === "/library" && pathname.startsWith("/preview"));
         return (
           <Link
             key={href}

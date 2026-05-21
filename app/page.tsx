@@ -100,7 +100,7 @@ export default async function DashboardPage() {
                   テーマから自動生成
                 </Link>
                 {totalArticles > 0 && (
-                  <Link href="/format" className={btnSecondary}>
+                  <Link href="/library" className={btnSecondary}>
                     下書きを開く
                   </Link>
                 )}
