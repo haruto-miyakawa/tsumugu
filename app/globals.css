@@ -52,6 +52,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure page content clears the fixed mobile bottom nav */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+}
+
 /* ─── Tiptap エディタ本文スタイル ─── */
 /*
   CSS specificity strategy:

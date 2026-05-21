@@ -2,7 +2,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// 3 tabs — /generate is accessible via home CTA and the center FAB, not a nav tab
+/*
+ * Layout:  [ホーム]   [ライブラリ]   [設定]    ← justify-around, 3 items
+ *                        [+]                  ← absolute left-1/2, floats above nav
+ *
+ * Positioning note:
+ *   `position: fixed` already creates a stacking/containing context for
+ *   absolutely-positioned children. We must NOT add `relative` alongside
+ *   `fixed` — in Tailwind's CSS output `relative` appears after `fixed`,
+ *   so it would win and the nav would scroll with the page instead of
+ *   sticking to the bottom. Only `fixed` is set here.
+ */
+
 const TABS = [
   {
     href: "/",
@@ -43,52 +54,68 @@ export function MobileNav() {
   const isActive = (href: string) =>
     href === "/"
       ? pathname === "/"
-      : pathname.startsWith(href) || (href === "/library" && pathname.startsWith("/preview"));
+      : pathname.startsWith(href) ||
+        (href === "/library" && pathname.startsWith("/preview"));
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper border-t border-rule flex items-center"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)", height: "calc(56px + env(safe-area-inset-bottom))" }}
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper border-t border-rule flex justify-around items-center"
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom)",
+        height: "calc(56px + env(safe-area-inset-bottom))",
+      }}
     >
-      {/* Left: ホーム */}
-      {TABS.slice(0, 1).map(({ href, label, icon }) => (
+      {/* 3 nav items — equally spaced, full 56px tap target each */}
+      {TABS.map(({ href, label, icon }) => (
         <Link
           key={href}
           href={href}
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 h-14 transition-colors ${
+          className={`flex flex-col items-center justify-center gap-0.5 h-[56px] px-4 transition-colors ${
             isActive(href) ? "text-accent" : "text-mute"
           }`}
         >
           <span style={{ stroke: "currentColor" }}>{icon}</span>
-          <span className="text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>{label}</span>
+          <span className="text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>
+            {label}
+          </span>
         </Link>
       ))}
 
-      {/* Center FAB — shortcut to /generate */}
-      <Link
-        href="/generate"
-        className="flex-shrink-0 w-12 h-12 mx-2 bg-accent text-white rounded-full flex items-center justify-center shadow-[4px_4px_0_#1B1A17] transition-transform active:scale-95"
-        aria-label="新しい記事を生成"
+      {/*
+       * FAB wrapper: paper-colored ring that lifts the + button visually
+       * above the nav bar and separates it from the ライブラリ icon below.
+       *
+       * bottom: calc(100% + 2px)
+       *   100%  = nav full height (56px + safe-area)
+       *   + 2px = small gap so wrapper bottom is 2px above nav top border
+       *   → entire FAB + ring floats above the nav, zero overlap
+       *
+       * bg-paper rounded-full p-[5px]
+       *   white ring of 5px around the orange FAB circle
+       *   visually distinct from nav's bg-paper background via shadow
+       */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 bg-paper rounded-full p-[5px] shadow-float"
+        style={{ bottom: "calc(100% + 2px)" }}
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-6 h-6">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </Link>
-
-      {/* Right: ライブラリ / 設定 */}
-      {TABS.slice(1).map(({ href, label, icon }) => (
         <Link
-          key={href}
-          href={href}
-          className={`flex-1 flex flex-col items-center justify-center gap-0.5 h-14 transition-colors ${
-            isActive(href) ? "text-accent" : "text-mute"
-          }`}
+          href="/generate"
+          className="flex w-12 h-12 bg-accent text-paper rounded-full items-center justify-center transition-transform active:scale-95"
+          aria-label="新しい記事を生成"
         >
-          <span style={{ stroke: "currentColor" }}>{icon}</span>
-          <span className="text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>{label}</span>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            className="w-6 h-6"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
         </Link>
-      ))}
+      </div>
     </nav>
   );
 }
