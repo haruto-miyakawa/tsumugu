@@ -19,6 +19,7 @@ export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/articl
     selectedTitle?: string;
     status?: ArticleData["status"];
     markdown?: string;
+    headerImage?: string;
   };
 
   let output = { ...article.output };
@@ -30,6 +31,7 @@ export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/articl
     updatedAt: new Date().toISOString(),
     output,
     ...(body.status !== undefined && { status: body.status }),
+    ...(body.headerImage !== undefined && { headerImage: body.headerImage }),
   };
 
   await writeJson(getArticlePath(id), updated);

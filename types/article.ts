@@ -32,6 +32,7 @@ export interface ArticleData {
 
   images: ArticleImage[];
   status: ArticleStatus;
+  headerImage?: string; // filename served via /api/images/[filename]
 }
 
 export interface ArticleSummary {
