@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// 3 tabs — /generate is accessible via home CTA and the center FAB, not a nav tab
 const TABS = [
   {
     href: "/",
@@ -13,17 +14,8 @@ const TABS = [
     ),
   },
   {
-    href: "/generate",
-    label: "生成",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-      </svg>
-    ),
-  },
-  {
     href: "/library",
-    label: "整形",
+    label: "ライブラリ",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
         <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -48,28 +40,31 @@ const TABS = [
 export function MobileNav() {
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname.startsWith(href) || (href === "/library" && pathname.startsWith("/preview"));
+
   return (
     <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper border-t border-rule flex items-center"
       style={{ paddingBottom: "env(safe-area-inset-bottom)", height: "calc(56px + env(safe-area-inset-bottom))" }}
     >
-      {TABS.slice(0, 2).map(({ href, label, icon }) => {
-        const active = pathname === href || (href !== "/" && pathname.startsWith(href));
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 h-14 transition-colors ${
-              active ? "text-accent" : "text-mute"
-            }`}
-          >
-            <span style={{ stroke: "currentColor" }}>{icon}</span>
-            <span className="text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>{label}</span>
-          </Link>
-        );
-      })}
+      {/* Left: ホーム */}
+      {TABS.slice(0, 1).map(({ href, label, icon }) => (
+        <Link
+          key={href}
+          href={href}
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 h-14 transition-colors ${
+            isActive(href) ? "text-accent" : "text-mute"
+          }`}
+        >
+          <span style={{ stroke: "currentColor" }}>{icon}</span>
+          <span className="text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>{label}</span>
+        </Link>
+      ))}
 
-      {/* Center FAB */}
+      {/* Center FAB — shortcut to /generate */}
       <Link
         href="/generate"
         className="flex-shrink-0 w-12 h-12 mx-2 bg-accent text-white rounded-full flex items-center justify-center shadow-[4px_4px_0_#1B1A17] transition-transform active:scale-95"
@@ -81,21 +76,19 @@ export function MobileNav() {
         </svg>
       </Link>
 
-      {TABS.slice(2).map(({ href, label, icon }) => {
-        const active = pathname.startsWith(href) || (href === "/library" && pathname.startsWith("/preview"));
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={`flex-1 flex flex-col items-center justify-center gap-0.5 h-14 transition-colors ${
-              active ? "text-accent" : "text-mute"
-            }`}
-          >
-            <span style={{ stroke: "currentColor" }}>{icon}</span>
-            <span className="text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>{label}</span>
-          </Link>
-        );
-      })}
+      {/* Right: ライブラリ / 設定 */}
+      {TABS.slice(1).map(({ href, label, icon }) => (
+        <Link
+          key={href}
+          href={href}
+          className={`flex-1 flex flex-col items-center justify-center gap-0.5 h-14 transition-colors ${
+            isActive(href) ? "text-accent" : "text-mute"
+          }`}
+        >
+          <span style={{ stroke: "currentColor" }}>{icon}</span>
+          <span className="text-[10px]" style={{ fontFamily: "var(--font-mono)" }}>{label}</span>
+        </Link>
+      ))}
     </nav>
   );
 }

@@ -58,14 +58,16 @@ export function OutlinePanel({ headings, isMobile }: Props) {
           </ul>
         )}
 
-        {/* AI observation */}
-        <div className="mt-5 pt-4 border-t border-rule">
-          <p className="font-mono text-[10px] tracking-widest text-mute uppercase mb-2">
+        {/* AI observation — v2 placeholder */}
+        <div className="mt-5 pt-4 border-t border-rule opacity-50 select-none">
+          <p className="font-mono text-[10px] tracking-widest text-faint uppercase mb-2">
             AI · OUTLINE
+            <span className="ml-1.5 normal-case font-sans tracking-normal text-[9px]">v2</span>
           </p>
-          <p className="text-[11px] font-serif text-ink-sub leading-relaxed">
-            見出しを4→5に増やすと読者の離脱が下がりそう。「温度」の章を分割しますか？
+          <p className="text-[11px] font-sans text-faint leading-relaxed">
+            執筆内容を分析して、構成の改善案を提案します。
           </p>
+          <p className="text-[10px] font-mono text-faint mt-2">— 準備中</p>
         </div>
       </div>
     </div>

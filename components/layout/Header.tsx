@@ -3,9 +3,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV = [
-  { href: "/",        label: "ホーム" },
-  { href: "/generate", label: "エディタ" },
-  { href: "/library", label: "ライブラリ" },
+  { href: "/",         label: "ホーム" },
+  { href: "/library",  label: "ライブラリ" },
   { href: "/settings", label: "設定" },
 ];
 
