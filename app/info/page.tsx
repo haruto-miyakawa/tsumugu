@@ -1,4 +1,5 @@
-import { PageContainer } from "@/components/layout/PageContainer";
+// No PageContainer — uses the same max-w-3xl mx-auto structure as /settings
+// so both page titles align at the same horizontal position.
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -38,8 +39,19 @@ function Kv({ k, v }: { k: string; v: string }) {
 
 export default function InfoPage() {
   return (
-    <PageContainer kicker="INFO" title="使い方">
-      <div className="space-y-8 max-w-2xl">
+    <main className="max-w-3xl mx-auto px-4 md:px-6 pt-8 pb-28 md:pb-12">
+
+      {/* Page header — same structure as /settings */}
+      <div className="mb-10">
+        <p className="font-mono text-[10px] tracking-widest text-mute uppercase mb-1">
+          INFO
+        </p>
+        <h1 className="font-display text-[40px] md:text-[52px] leading-none text-ink">
+          使い方
+        </h1>
+      </div>
+
+      <div className="space-y-8">
 
         {/* つむぐとは */}
         <Section title="つむぐとは">
@@ -122,6 +134,6 @@ export default function InfoPage() {
         </Section>
 
       </div>
-    </PageContainer>
+    </main>
   );
 }
