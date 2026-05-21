@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-05-21T07:15:15.299Z",
+  "updatedAt": "2026-05-21T07:25:12.675Z",
   "tone": {
     "formality": "casual",
     "humor": "light",
@@ -24,7 +24,7 @@
     "emojiUsage": "minimal"
   },
   "noteSpecific": {
-    "targetLength": 2000,
+    "targetLength": 3000,
     "hashTags": [],
     "categoryHint": ""
   }

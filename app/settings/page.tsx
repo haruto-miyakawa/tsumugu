@@ -6,7 +6,7 @@ import { StyleDisplay } from "@/components/style/StyleDisplay";
 import { StyleEditor } from "@/components/style/StyleEditor";
 import { StyleAnalyzer } from "@/components/style/StyleAnalyzer";
 import { SettingsSection } from "@/components/settings/SettingsSection";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";     // used for "編集" button
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export default function SettingsPage() {
@@ -69,18 +69,21 @@ export default function SettingsPage() {
             {/* Current style display / editor */}
             <div className="p-5 md:p-6">
               {isEditMode ? (
-                <StyleEditor style={style} onSave={handleSave} />
+                <StyleEditor
+                  style={style}
+                  onSave={handleSave}
+                  onCancel={() => setIsEditMode(false)}
+                />
               ) : (
-                <StyleDisplay style={style} />
+                <>
+                  <StyleDisplay style={style} />
+                  <div className="mt-5 pt-4 border-t border-rule">
+                    <Button variant="primary" onClick={() => setIsEditMode(true)}>
+                      編集
+                    </Button>
+                  </div>
+                </>
               )}
-              <div className="mt-5 flex gap-2 pt-4 border-t border-rule">
-                <Button
-                  variant={isEditMode ? "secondary" : "primary"}
-                  onClick={() => setIsEditMode((v) => !v)}
-                >
-                  {isEditMode ? "キャンセル" : "編集"}
-                </Button>
-              </div>
             </div>
 
             {/* Divider */}
