@@ -8,7 +8,7 @@ interface PageContainerProps {
 
 export function PageContainer({ children, title, kicker }: PageContainerProps) {
   return (
-    <main className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-10 pb-28 md:pb-10">
+    <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-10 pb-28 md:pb-10">
       {(kicker || title) && (
         <div className="mb-6 md:mb-8">
           {kicker && (

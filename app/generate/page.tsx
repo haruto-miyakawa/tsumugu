@@ -55,7 +55,7 @@ function GeneratePageContent() {
 
   return (
     <PageContainer kicker="EDITOR" title="記事を生成する">
-      <div className="max-w-2xl">
+      <div className="max-w-2xl mx-auto">
         {article ? (
           <Card kicker="GENERATED" title="生成完了">
             <ArticleResult article={article} onTitleChange={handleTitleChange} />

@@ -80,7 +80,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <main className="max-w-5xl mx-auto px-4 md:px-6 pt-6 pb-28 md:pb-10">
+    <main className="max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-28 md:pb-10">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_288px] gap-5">
 
         {/* ━━━ Left / Row 1 — Greeting ━━━ */}
