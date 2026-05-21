@@ -6,7 +6,7 @@ const NAV = [
   { href: "/",        label: "ホーム" },
   { href: "/generate", label: "エディタ" },
   { href: "/library", label: "ライブラリ" },
-  { href: "/style",   label: "スタイル" },
+  { href: "/settings", label: "設定" },
 ];
 
 export function Header() {

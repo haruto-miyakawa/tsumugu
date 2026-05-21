@@ -34,7 +34,7 @@ const TABS = [
     ),
   },
   {
-    href: "/style",
+    href: "/settings",
     label: "設定",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
