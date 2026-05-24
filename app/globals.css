@@ -14,7 +14,7 @@
   --color-highlight:    #FFF6BE; /* 黄マーカー (AI候補) */
 
   /* アクセント — デフォルトはピンク。amber/mint は別名で並存 */
-  --color-accent:       #E84B7C; /* bluehamham 風ホットピンク */
+  --color-accent:       #E84B7C; /* ホットピンク（アクセント） */
   --color-accent-mint:  #2BC4A5;
   --color-accent-amber: #E27A2D; /* 旧デフォルト */
 
@@ -41,7 +41,7 @@
   /* ─── 影 ─── */
   --shadow-card: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
   --shadow-pop:  0 8px 28px rgba(0,0,0,.18);
-  --shadow-hard: 4px 4px 0 #1B1A17; /* bluehamham 風フロート要素 */
+  --shadow-hard: 4px 4px 0 #1B1A17; /* ハードシャドウ（フロート要素用） */
 
   /* DESIGN_SPEC 互換 */
   --shadow-float:      0 6px 16px rgba(0,0,0,0.15);
