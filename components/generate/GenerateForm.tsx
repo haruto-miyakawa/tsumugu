@@ -1,9 +1,17 @@
 "use client";
 import { useState } from "react";
+import { toast } from "sonner";
 import { GenerateRequest } from "@/types/api";
-import { GENRES, TONES, STRUCTURES, type LengthPreference } from "@/types/from-readme";
+import {
+  GENRES,
+  TONES,
+  STRUCTURES,
+  type LengthPreference,
+  type FromReadmeResponse,
+} from "@/types/from-readme";
 import { TextArea } from "@/components/ui/TextArea";
 import { Btn } from "@/components/ui/Btn";
+import { FromReadmeButton } from "./FromReadmeButton";
 
 interface GenerateFormProps {
   onSubmit: (req: GenerateRequest) => Promise<void>;
@@ -50,6 +58,18 @@ const labelCls =
 const inputCls =
   "w-full bg-surface border border-rule text-ink text-[13px] font-sans rounded-sm px-3 py-2.5 focus:outline-none focus:border-accent transition-colors placeholder:text-mute-soft";
 
+// Undo 用のスナップショット型
+type FormSnapshot = {
+  theme: string;
+  episode: string;
+  targetReader: string;
+  lengthPreference: LengthPreference;
+  genre: string;
+  tone: string;
+  structure: string;
+  additionalNotes: string;
+};
+
 export function GenerateForm({ onSubmit, isLoading, defaultTheme = "" }: GenerateFormProps) {
   const [theme, setTheme] = useState(defaultTheme);
   const [episode, setEpisode] = useState("");
@@ -62,6 +82,50 @@ export function GenerateForm({ onSubmit, isLoading, defaultTheme = "" }: Generat
 
   const toggle = (current: string, value: string, set: (v: string) => void) => {
     set(current === value ? "" : value);
+  };
+
+  // ─── READMEから自動入力 ─────────────────────────────────────────────────
+  // 直前の state をクロージャで掴んでおき、Undo で完全復元できるようにする。
+  const handleApplyFromReadme = (response: FromReadmeResponse) => {
+    const snapshot: FormSnapshot = {
+      theme,
+      episode,
+      targetReader,
+      lengthPreference,
+      genre,
+      tone,
+      structure,
+      additionalNotes,
+    };
+
+    // 全フィールド上書き
+    setTheme(response.theme);
+    setEpisode(response.episode);
+    setTargetReader(response.targetReader);
+    setLengthPreference(response.lengthPreference);
+    setGenre(response.genre);
+    setTone(response.tone);
+    setStructure(response.structure);
+    setAdditionalNotes(response.additionalNotes);
+
+    // Undo 付きトースト（8 秒間）
+    toast.success("READMEから自動入力しました", {
+      description: "内容を確認・編集できます",
+      duration: 8000,
+      action: {
+        label: "元に戻す",
+        onClick: () => {
+          setTheme(snapshot.theme);
+          setEpisode(snapshot.episode);
+          setTargetReader(snapshot.targetReader);
+          setLengthPreference(snapshot.lengthPreference);
+          setGenre(snapshot.genre);
+          setTone(snapshot.tone);
+          setStructure(snapshot.structure);
+          setAdditionalNotes(snapshot.additionalNotes);
+        },
+      },
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -82,6 +146,16 @@ export function GenerateForm({ onSubmit, isLoading, defaultTheme = "" }: Generat
 
   return (
     <form onSubmit={handleSubmit} className="space-y-7">
+      {/* READMEから自動入力 */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-1">
+        <FromReadmeButton onApply={handleApplyFromReadme} disabled={isLoading} />
+        <p className="font-serif text-[12px] text-mute leading-snug">
+          README を貼ると、テーマ・エピソード・口調などを下書きしてくれます。
+        </p>
+      </div>
+
+      <div className="border-t border-rule" />
+
       {/* Theme */}
       <div className="space-y-2">
         <label className={labelCls}>テーマ *</label>
