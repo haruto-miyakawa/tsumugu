@@ -83,7 +83,7 @@ export function RichEditor({
         editor={editor}
         shouldShow={({ state }) => !state.selection.empty}
         options={{ placement: "top", offset: 8 }}
-        className="flex items-center gap-0.5 bg-paper border border-rule rounded-md shadow-float p-1 z-50"
+        className="flex items-center gap-0.5 bg-paper border border-rule rounded-sm shadow-pop p-1 z-50"
       >
         <ToolbarBtn title="太字 (Ctrl+B)" isActive={editor.isActive("bold")}
           onClick={() => editor.chain().focus().toggleBold().run()}>B</ToolbarBtn>
@@ -112,8 +112,12 @@ export function RichEditor({
             e.preventDefault(); // prevent editor blur → selection preserved
             onAiFocusRef.current?.();
           }}
-          className="w-7 h-7 flex items-center justify-center text-[11px] font-sans font-semibold rounded-sm transition-colors select-none text-accent hover:bg-marker cursor-pointer"
+          className="inline-flex items-center gap-1 h-7 px-2 text-accent font-display text-[12px] tracking-[0.12em] rounded-sm hover:bg-highlight transition-colors select-none cursor-pointer leading-none"
         >
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" />
+            <path d="M19 14l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" />
+          </svg>
           AI
         </button>
       </BubbleMenu>

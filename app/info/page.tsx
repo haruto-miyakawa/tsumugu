@@ -43,10 +43,10 @@ export default function InfoPage() {
 
       {/* Page header — same structure as /settings */}
       <div className="mb-10">
-        <p className="font-mono text-[10px] tracking-widest text-mute uppercase mb-1">
+        <p className="font-display text-[11px] tracking-[0.22em] text-mute uppercase mb-2 leading-none">
           INFO
         </p>
-        <h1 className="font-display text-[40px] md:text-[52px] leading-none text-ink">
+        <h1 className="font-serif font-medium text-[28px] md:text-[36px] leading-[1.2] text-ink tracking-[0.01em]">
           使い方
         </h1>
       </div>

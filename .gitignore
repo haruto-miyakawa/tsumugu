@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 memory/
 !.env.local.example
+
+# v2.0 開発用の設計図（ローカル参照用、公開しない）
+design-reference/v1.5-blueprint/

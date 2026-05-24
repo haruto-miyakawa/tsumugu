@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { StyleConfig } from "@/types/style";
-import { Button } from "@/components/ui/Button";
+import { Btn } from "@/components/ui/Btn";
 import { Select } from "@/components/ui/Select";
 import { Toggle } from "@/components/ui/Toggle";
 
@@ -307,11 +307,13 @@ export function StyleEditor({ style, onSave, onCancel }: StyleEditorProps) {
 
       {/* ── Actions ── */}
       <div className="flex gap-2 pt-2">
-        <Button onClick={handleSave} isLoading={isSaving}>保存</Button>
+        <Btn kind="primary" icon="check" onClick={handleSave} disabled={isSaving}>
+          {isSaving ? "保存中…" : "保存"}
+        </Btn>
         {onCancel && (
-          <Button variant="secondary" onClick={onCancel} disabled={isSaving}>
+          <Btn kind="soft" onClick={onCancel} disabled={isSaving}>
             キャンセル
-          </Button>
+          </Btn>
         )}
       </div>
     </div>

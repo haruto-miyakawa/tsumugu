@@ -80,7 +80,7 @@ import { Noto_Serif_JP, Noto_Sans_JP, Bebas_Neue } from "next/font/google";
 フォントサイズの頻出値: `10/11/12/13`px = ラベル系、`16`px = 基準、
 `17/18`px = やや大きめUI、`22/26/28/36`px = 見出し・ディスプレイ。
 
-設計意図（design-notes より）: 「note の落ち着きに、bluehamham の遊び心を一滴」。
+設計意図（design-notes より）: 「note の落ち着きに、ポップで遊び心のあるアクセントを一滴」。
 ベースは紙とインクの低彩度トーン。アクセントの橙は **CTA・進行中・選択状態にだけ** 使う。
 
 ---
