@@ -66,6 +66,16 @@ export function FromReadmeModal({ open, onClose, onApply }: FromReadmeModalProps
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // 閉じる時の transient state リセット（effect ではなくユーザーアクション側で行う）
+  const handleClose = useCallback(() => {
+    setPendingWarning(null);
+    setError(null);
+    setDropError(null);
+    setIsDragging(false);
+    abortRef.current?.abort();
+    onClose();
+  }, [onClose]);
+
   // ─── body scroll lock + ESC ───────────────────────────────────────────────
   useEffect(() => {
     if (!open) return;
@@ -74,7 +84,7 @@ export function FromReadmeModal({ open, onClose, onApply }: FromReadmeModalProps
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !isAnalyzing) {
         if (pendingWarning) setPendingWarning(null);
-        else onClose();
+        else handleClose();
       }
     };
     document.addEventListener("keydown", onKey);
@@ -82,18 +92,7 @@ export function FromReadmeModal({ open, onClose, onApply }: FromReadmeModalProps
       document.body.style.overflow = prevOverflow;
       document.removeEventListener("keydown", onKey);
     };
-  }, [open, isAnalyzing, pendingWarning, onClose]);
-
-  // 起動時にリセットしすぎず、閉じた時にだけクリーンアップ
-  useEffect(() => {
-    if (!open) {
-      setPendingWarning(null);
-      setError(null);
-      setDropError(null);
-      setIsDragging(false);
-      abortRef.current?.abort();
-    }
-  }, [open]);
+  }, [open, isAnalyzing, pendingWarning, handleClose]);
 
   // ─── 解析 API 呼び出し ────────────────────────────────────────────────────
   const callApi = useCallback(async () => {
@@ -121,18 +120,18 @@ export function FromReadmeModal({ open, onClose, onApply }: FromReadmeModalProps
         setError(data?.error ?? "解析に失敗しました");
         return;
       }
-      // 親に渡す（モーダルを閉じるのは親側で）
+      // 親に渡す
       onApply(data as FromReadmeResponse);
       // フィールドをクリアしてから閉じる
       setReadmeText("");
-      onClose();
+      handleClose();
     } catch (e) {
       if ((e as Error).name === "AbortError") return;
       setError("通信エラーが発生しました");
     } finally {
       setIsAnalyzing(false);
     }
-  }, [readmeText, platform, onApply, onClose]);
+  }, [readmeText, platform, onApply, handleClose]);
 
   // ─── 「解析する」クリックハンドラ ─────────────────────────────────────────
   const handleAnalyze = () => {
@@ -193,7 +192,7 @@ export function FromReadmeModal({ open, onClose, onApply }: FromReadmeModalProps
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-ink/50"
       onClick={() => {
-        if (!isAnalyzing) onClose();
+        if (!isAnalyzing) handleClose();
       }}
       role="dialog"
       aria-modal="true"
@@ -218,7 +217,7 @@ export function FromReadmeModal({ open, onClose, onApply }: FromReadmeModalProps
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isAnalyzing}
             aria-label="閉じる"
             className="text-mute hover:text-ink disabled:opacity-40 disabled:cursor-not-allowed transition-colors mt-1"
