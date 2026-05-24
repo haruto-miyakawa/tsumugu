@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { GenerateRequest } from "@/types/api";
+import { GENRES, TONES, STRUCTURES, type LengthPreference } from "@/types/from-readme";
 import { TextArea } from "@/components/ui/TextArea";
 import { Btn } from "@/components/ui/Btn";
 
@@ -10,10 +11,7 @@ interface GenerateFormProps {
   defaultTheme?: string;
 }
 
-const GENRES = ["エッセイ", "ハウツー", "体験記", "レビュー", "コラム"];
-const TONES = ["です・ます", "カジュアル", "詩的"];
-const STRUCTURES = ["起承転結", "結論先出し", "散文"];
-const LENGTHS = [
+const LENGTHS: ReadonlyArray<{ value: LengthPreference; label: string; sub: string }> = [
   { value: "short",  label: "短め", sub: "〜1,000字" },
   { value: "medium", label: "普通", sub: "〜2,000字" },
   { value: "long",   label: "長め", sub: "〜3,500字" },
@@ -56,7 +54,7 @@ export function GenerateForm({ onSubmit, isLoading, defaultTheme = "" }: Generat
   const [theme, setTheme] = useState(defaultTheme);
   const [episode, setEpisode] = useState("");
   const [targetReader, setTargetReader] = useState("");
-  const [lengthPreference, setLengthPreference] = useState<"short" | "medium" | "long">("medium");
+  const [lengthPreference, setLengthPreference] = useState<LengthPreference>("medium");
   const [genre, setGenre] = useState("");
   const [tone, setTone] = useState("");
   const [structure, setStructure] = useState("");
@@ -154,7 +152,7 @@ export function GenerateForm({ onSubmit, isLoading, defaultTheme = "" }: Generat
                 key={value}
                 type="button"
                 disabled={isLoading}
-                onClick={() => setLengthPreference(value as "short" | "medium" | "long")}
+                onClick={() => setLengthPreference(value)}
                 className={`relative py-3 px-2 text-center border rounded-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   active
                     ? "bg-paper border-ink text-ink"
