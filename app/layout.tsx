@@ -5,6 +5,7 @@ import {
   Bebas_Neue,
   JetBrains_Mono,
 } from "next/font/google";
+import { Toaster } from "sonner";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import "./globals.css";
@@ -54,6 +55,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         {children}
         <MobileNav />
+        {/*
+          sonner Toaster — つむぐデザイントークンに揃える。
+          richColors は使わない（鮮やかすぎて「note の落ち着き」と相性が悪い）。
+          toastOptions.classNames で全トーストを bg-paper / shadow-pop に統一。
+        */}
+        <Toaster
+          position="top-center"
+          duration={4000}
+          toastOptions={{
+            classNames: {
+              toast:
+                "bg-paper border border-rule shadow-pop rounded-sm text-ink font-sans",
+              title: "font-sans text-[13px] text-ink",
+              description: "font-sans text-[12px] text-mute",
+              actionButton:
+                "bg-accent text-paper text-[12px] font-medium rounded-full px-3 py-1",
+              cancelButton:
+                "text-mute text-[12px] font-medium rounded-full px-3 py-1",
+            },
+          }}
+        />
       </body>
     </html>
   );
