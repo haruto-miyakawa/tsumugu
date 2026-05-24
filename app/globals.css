@@ -1,45 +1,51 @@
 @import "tailwindcss";
 
 @theme {
-  /* --- カラー（DESIGN_SPEC 正規名） --- */
-  --color-bg:        #F0EEE9;
-  --color-paper:     #FFFFFF;
-  --color-surface:   #FBF8F1;
-  --color-rule:      #E6E0D2;
-  --color-ink:       #1B1A17;
-  --color-ink-sub:   #3A372F;
-  --color-mute:      #807A6E;
-  --color-faint:     #B4AEA0;
-  --color-accent:    #E27A2D;
-  --color-marker:    #FFF6BE;
+  /* ─── カラー（HANDOFF.md §3 tokens） ─── */
+  --color-bg:           #F0EEE9; /* ウォーム生成り（背景） */
+  --color-paper:        #FFFFFF; /* 紙面 */
+  --color-surface:      #FBF8F1; /* ベージュ寄りの面 */
+  --color-surface2:     #F1ECDF;
+  --color-rule:         #E6E0D2; /* 罫線 */
+  --color-ink:          #1B1A17; /* 墨色 */
+  --color-ink-soft:     #3A372F;
+  --color-mute:         #807A6E;
+  --color-mute-soft:    #B4AEA0;
+  --color-highlight:    #FFF6BE; /* 黄マーカー (AI候補) */
 
-  /* 互換エイリアス — コンポーネント整備時に削除 */
-  --color-ink-soft:  #3A372F;
-  --color-mute-soft: #B4AEA0;
-  --color-highlight: #FFF6BE;
-  --color-surface2:  #F1ECDF;  /* DESIGN_SPEC 外。コンポーネント使用中 */
+  /* アクセント — デフォルトはピンク。amber/mint は別名で並存 */
+  --color-accent:       #E84B7C; /* bluehamham 風ホットピンク */
+  --color-accent-mint:  #2BC4A5;
+  --color-accent-amber: #E27A2D; /* 旧デフォルト */
 
-  /* --- フォント（DESIGN_SPEC 正規名） --- */
+  /* ─── DESIGN_SPEC 互換エイリアス（既存コードが参照中） ─── */
+  --color-ink-sub:      #3A372F;
+  --color-faint:        #B4AEA0;
+  --color-marker:       #FFF6BE;
+
+  /* ─── フォント ─── */
   --font-serif:    var(--font-noto-serif),   "Noto Serif JP",  "Hiragino Mincho ProN", Georgia, serif;
   --font-sans:     var(--font-noto-sans),    "Noto Sans JP",   -apple-system, "Hiragino Kaku Gothic ProN", sans-serif;
   --font-display:  var(--font-bebas),        "Bebas Neue",     "Oswald", Impact, sans-serif;
   --font-mono:     var(--font-jetbrains),    "JetBrains Mono", "Fira Code", ui-monospace, monospace;
-
-  /* 互換エイリアス — コンポーネント整備時に削除 */
   --font-heading:  var(--font-bebas),        "Bebas Neue",     "Oswald", Impact, sans-serif;
 
-  /* --- 角丸 --- */
-  --radius-sm: 2px;
+  /* ─── 角丸 ─── */
+  --radius-sharp: 2px; /* カード・面（紙感） */
+  --radius-sm:    4px;
+  --radius-pill:  9999px; /* ボタン・チップ */
+
+  /* DESIGN_SPEC 互換 */
   --radius-md: 4px;
 
-  /* --- 影（DESIGN_SPEC 正規） --- */
-  --shadow-card:       0 1px 6px rgba(0,0,0,0.04);
+  /* ─── 影 ─── */
+  --shadow-card: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-pop:  0 8px 28px rgba(0,0,0,.18);
+  --shadow-hard: 4px 4px 0 #1B1A17; /* bluehamham 風フロート要素 */
+
+  /* DESIGN_SPEC 互換 */
   --shadow-float:      0 6px 16px rgba(0,0,0,0.15);
   --shadow-float-soft: 0 6px 24px rgba(0,0,0,0.08);
-
-  /* DESIGN_SPEC 外 — 後で整理 */
-  --shadow-hard: 4px 4px 0 #1B1A17;
-  --shadow-pop:  0 8px 28px rgba(0,0,0,.18);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
