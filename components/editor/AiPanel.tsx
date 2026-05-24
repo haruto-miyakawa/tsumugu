@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Tsumugi } from "@/components/ui/Tsumugi";
+import { Tsumugi, type TsumugiMood } from "@/components/mascot/Tsumugi";
+import { Btn } from "@/components/ui/Btn";
 import { ArticleData } from "@/types/article";
 import type { SelectionRange, NodeTypeInfo } from "@/types/editor";
 
@@ -66,12 +67,18 @@ export function AiPanel({
   const [messages, setMessages]     = useState<AiMessage[]>([GREETING]);
   const [input, setInput]           = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [justCompleted, setJustCompleted] = useState(false);
   const abortRef  = useRef<AbortController | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const completeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => () => {
+    if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
+  }, []);
 
   const stream = useCallback(
     async (
@@ -86,6 +93,7 @@ export function AiPanel({
 
       const aiId = `ai-${Date.now()}`;
       setIsStreaming(true);
+      setJustCompleted(false);
       setMessages((prev) => [
         ...prev,
         {
@@ -134,6 +142,11 @@ export function AiPanel({
         setMessages((prev) =>
           prev.map((m) => m.id === aiId ? { ...m, isStreaming: false } : m)
         );
+
+        // Light a "happy" mood briefly when generation completes
+        setJustCompleted(true);
+        if (completeTimerRef.current) clearTimeout(completeTimerRef.current);
+        completeTimerRef.current = setTimeout(() => setJustCompleted(false), 2500);
       } catch (e) {
         if ((e as Error).name === "AbortError") return;
         setMessages((prev) =>
@@ -160,32 +173,48 @@ export function AiPanel({
 
   const hasSelection = Boolean(selectedText);
 
-  return (
-    <div className={`bg-surface border-l border-rule flex flex-col overflow-hidden flex-shrink-0 ${isMobile ? "w-full" : "w-[280px]"}`}>
+  // Mood logic — observed state only, no critique
+  const mood: TsumugiMood = isStreaming
+    ? "writing"
+    : justCompleted
+    ? "happy"
+    : input.trim().length > 0
+    ? "thinking"
+    : "idle";
 
-      {/* ── Header ── */}
-      <div className="shrink-0 flex items-center gap-2.5 px-4 py-3 border-b border-rule">
-        <Tsumugi size={28} mood={isStreaming ? "writing" : "thinking"} className="shrink-0" />
-        <div className="min-w-0">
-          <p className="text-[12px] font-sans font-medium text-ink leading-none">つむぎ</p>
-          <p className="text-[10px] font-mono text-mute mt-0.5 truncate">聞き役 · 編集者モード</p>
+  return (
+    <div className={`bg-surface border-l border-rule flex flex-col overflow-hidden flex-shrink-0 ${isMobile ? "w-full" : "w-[300px]"}`}>
+
+      {/* ── Header — つむぎ avatar with live mood ── */}
+      <div className="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-rule bg-paper">
+        <Tsumugi size={40} mood={mood} className="shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="font-sans text-[13px] font-medium text-ink leading-none">つむぎ</p>
+          <p className="font-mono text-[10px] text-mute mt-1 truncate leading-none">
+            {isStreaming ? "書き中…" : justCompleted ? "できました" : "聞き役 · 編集者モード"}
+          </p>
         </div>
-        <span className="ml-auto font-mono text-[9px] text-faint shrink-0">v2.4</span>
       </div>
 
-      {/* ── Context strip ── */}
-      <div className={`shrink-0 px-4 py-2.5 border-b border-rule transition-colors ${hasSelection ? "bg-marker/20" : "bg-surface"}`}>
+      {/* ── Context strip — yellow marker on selection ── */}
+      <div
+        className={`shrink-0 px-4 py-2.5 border-b border-rule transition-colors ${
+          hasSelection ? "bg-highlight" : "bg-surface"
+        }`}
+      >
         {hasSelection ? (
           <>
-            <p className="font-mono text-[9px] text-faint uppercase tracking-widest mb-0.5">対象</p>
-            <p className="text-[11px] font-sans text-ink-sub leading-snug">
-              {selectedText.length > 30
-                ? selectedText.slice(0, 30).replace(/\n/g, " ") + "…"
+            <p className="font-display text-[10px] text-ink-soft tracking-[0.18em] uppercase mb-0.5 leading-none">
+              対象
+            </p>
+            <p className="text-[12px] font-serif text-ink leading-snug">
+              {selectedText.length > 36
+                ? selectedText.slice(0, 36).replace(/\n/g, " ") + "…"
                 : selectedText.replace(/\n/g, " ")}
             </p>
           </>
         ) : (
-          <p className="text-[11px] font-sans text-faint italic">
+          <p className="text-[11px] font-sans text-mute italic leading-snug">
             本文を選択してから話しかけてください
           </p>
         )}
@@ -196,14 +225,14 @@ export function AiPanel({
         {messages.map((msg) =>
           msg.role === "user" ? (
             <div key={msg.id} className="flex justify-end">
-              <div className="bg-bg border border-rule rounded-sm px-3 py-2 max-w-[85%]">
+              <div className="bg-ink text-paper rounded-sm px-3 py-2 max-w-[88%]">
                 {msg.savedSelectedText && (
-                  <p className="font-mono text-[9px] text-faint uppercase tracking-widest mb-1 truncate">
+                  <p className="font-mono text-[9px] text-paper/70 uppercase tracking-widest mb-1 truncate">
                     対象: {msg.savedSelectedText.slice(0, 20).replace(/\n/g, " ")}
                     {msg.savedSelectedText.length > 20 ? "…" : ""}
                   </p>
                 )}
-                <p className="text-[11px] font-sans text-ink-sub leading-relaxed whitespace-pre-wrap">
+                <p className="text-[12px] font-sans leading-relaxed whitespace-pre-wrap">
                   {msg.text}
                 </p>
               </div>
@@ -215,19 +244,23 @@ export function AiPanel({
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Quick actions ── */}
-      <div className="shrink-0 px-4 pb-3 border-t border-rule pt-3">
+      {/* ── Quick actions — Chip-styled buttons ── */}
+      <div className="shrink-0 px-4 pt-3 pb-2 border-t border-rule">
+        <p className="font-display text-[9px] text-mute tracking-[0.18em] uppercase mb-2 leading-none">
+          QUICK
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {QUICK_ACTIONS.map((action) => (
             <button
               key={action.label}
+              type="button"
               onClick={() => {
                 if (!isStreaming && hasSelection)
                   stream(action.prompt, replaceRange, selectedText, replaceNodeType);
               }}
               disabled={isStreaming || !hasSelection}
               title={!hasSelection ? "本文で範囲選択してから使えます" : action.label}
-              className="text-[11px] font-sans text-ink-sub bg-paper border border-rule px-2.5 py-1 rounded-sm hover:bg-bg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1 px-2.5 py-[5px] rounded-full font-sans font-medium text-[11px] tracking-[0.02em] leading-none border bg-paper text-ink-soft border-rule hover:bg-surface2 hover:text-ink transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {action.label}
             </button>
@@ -236,8 +269,8 @@ export function AiPanel({
       </div>
 
       {/* ── Input ── */}
-      <div className="shrink-0 border-t border-rule p-3">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="shrink-0 border-t border-rule p-3 bg-paper">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-surface border border-rule rounded-full pl-3.5 pr-1.5 py-1">
           <input
             ref={inputRef}
             type="text"
@@ -245,14 +278,17 @@ export function AiPanel({
             onChange={(e) => setInput(e.target.value)}
             placeholder={hasSelection ? "つむぎに頼む…" : "まず本文を選択してください"}
             disabled={isStreaming || !hasSelection}
-            className="flex-1 min-w-0 bg-surface border border-rule text-ink text-[12px] font-sans rounded-sm px-3 py-2 placeholder:text-faint focus:outline-none focus:border-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 min-w-0 bg-transparent text-ink text-[12px] font-sans py-1 placeholder:text-mute-soft focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
             type="submit"
             disabled={isStreaming || !input.trim() || !hasSelection}
-            className="bg-accent text-paper text-[13px] font-sans font-medium px-3 py-2 rounded-sm disabled:opacity-40 shrink-0 hover:brightness-90 transition-all"
+            aria-label="送信"
+            className="w-7 h-7 rounded-full bg-ink text-paper flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110 transition-all shrink-0"
           >
-            →
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
           </button>
         </form>
       </div>
@@ -270,7 +306,7 @@ function AssistantBubble({
 }) {
   if (msg.id === "greeting") {
     return (
-      <p className="text-[12px] font-serif text-ink-sub leading-relaxed whitespace-pre-wrap">
+      <p className="text-[12px] font-serif text-ink-soft leading-relaxed whitespace-pre-wrap">
         {msg.text}
       </p>
     );
@@ -281,10 +317,10 @@ function AssistantBubble({
   const canReplace    = hasSuggestion && !msg.isStreaming && !msg.error && msg.savedRange !== null;
 
   return (
-    <div className={`bg-paper border border-rule rounded-md p-3 space-y-2.5 ${msg.error ? "opacity-60" : ""}`}>
+    <div className={`bg-paper border border-rule rounded-sm p-3 space-y-2.5 ${msg.error ? "opacity-60" : ""}`}>
 
       {comment && (
-        <p className="text-[12px] font-serif text-ink leading-relaxed whitespace-pre-wrap">
+        <p className="text-[12px] font-serif text-ink leading-[1.65] whitespace-pre-wrap">
           {comment}
           {msg.isStreaming && !hasSuggestion && <StreamCursor />}
         </p>
@@ -292,25 +328,29 @@ function AssistantBubble({
 
       {hasSuggestion && (
         <div className="bg-surface border border-rule rounded-sm px-3 py-2.5">
-          <p className="font-mono text-[9px] text-faint uppercase tracking-widest mb-1.5">
+          <p className="font-display text-[10px] text-mute tracking-[0.18em] uppercase mb-1.5 leading-none">
             提案テキスト
           </p>
-          <p className="text-[12px] font-serif text-ink-sub leading-relaxed whitespace-pre-wrap">
-            {suggestion}
-            {msg.isStreaming && <StreamCursor />}
+          <p className="text-[12px] font-serif leading-[1.7] whitespace-pre-wrap">
+            <span className="bg-highlight text-ink box-decoration-clone px-[3px] py-[1px]">
+              {suggestion}
+              {msg.isStreaming && <StreamCursor />}
+            </span>
           </p>
         </div>
       )}
 
       {canReplace && (
-        <div className="flex items-center gap-2 pt-0.5">
-          <button
+        <div className="flex items-center gap-2 pt-0.5 flex-wrap">
+          <Btn
+            kind="accent"
+            size="sm"
+            iconRight="arrow-right"
             onClick={() => onReplace(suggestion!, msg.savedRange!, msg.savedNodeType)}
-            className="text-[11px] font-sans text-paper bg-accent px-3 py-1 rounded-sm hover:brightness-90 transition-colors"
           >
             選択範囲を置き換える
-          </button>
-          <span className="text-[10px] text-faint">
+          </Btn>
+          <span className="font-mono text-[10px] text-mute-soft">
             「{msg.savedSelectedText.slice(0, 12).replace(/\n/g, " ")}
             {msg.savedSelectedText.length > 12 ? "…" : ""}」→ 提案
           </span>
@@ -318,7 +358,7 @@ function AssistantBubble({
       )}
 
       {!msg.isStreaming && !hasSuggestion && !msg.error && msg.savedRange === null && (
-        <p className="text-[10px] text-faint">
+        <p className="text-[10px] text-mute-soft">
           段落を選択して話しかけると置き換えボタンが出ます
         </p>
       )}
@@ -327,5 +367,5 @@ function AssistantBubble({
 }
 
 function StreamCursor() {
-  return <span className="inline-block w-0.5 h-3.5 bg-accent ml-0.5 align-middle animate-pulse" />;
+  return <span className="inline-block w-0.5 h-3.5 bg-ink ml-0.5 align-middle animate-pulse" />;
 }
