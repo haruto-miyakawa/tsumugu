@@ -7,6 +7,10 @@ import { FormatPreview } from "@/components/format/FormatPreview";
 import { Card } from "@/components/ui/Card";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Tsumugi } from "@/components/ui/Tsumugi";
+import { TsumugiTiny } from "@/components/mascot/TsumugiTiny";
+import { Btn } from "@/components/ui/Btn";
+import { Chip } from "@/components/ui/Chip";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { markdownToHtml } from "@/lib/markdown";
 
 type PlacementInfo = { afterHeading: string; altText: string; reason: string };
@@ -258,40 +262,33 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
 
         {/* ── Preview sub-bar ── */}
         <div className="sticky top-[68px] z-30 bg-paper border-b border-rule">
-          <div className="max-w-[760px] mx-auto px-5 md:px-6 h-11 flex items-center justify-between gap-3">
+          <div className="max-w-[760px] mx-auto px-5 md:px-6 h-12 flex items-center justify-between gap-3">
 
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Link href="/" className="flex items-center gap-1 hover:opacity-80 transition-opacity shrink-0">
-                <span className="font-display text-[22px] leading-none text-ink tracking-wide">
-                  つむぐ
-                </span>
+            <div className="flex items-center gap-2 min-w-0">
+              <Link href="/" className="font-serif text-[20px] leading-none text-ink tracking-[0.04em] hover:opacity-80 transition-opacity shrink-0">
+                つむぐ
               </Link>
-              <span className="text-faint text-[13px] font-sans">·</span>
-              <span className="text-[12px] font-sans text-mute">プレビュー</span>
+              <span className="font-display text-[10px] tracking-[0.18em] text-mute leading-none">
+                · プレビュー
+              </span>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <span className="hidden sm:inline text-[10px] font-mono bg-surface border border-rule px-2 py-0.5 rounded-sm text-mute">
-                下書き
+              <span className="hidden sm:inline-flex">
+                <Chip>下書き</Chip>
               </span>
-              <Link
-                href={`/editor/${id}`}
-                className="text-[12px] font-sans text-ink-sub border border-rule px-3 py-1 rounded-sm hover:bg-surface transition-colors"
-              >
-                エディタに戻る
+              <Link href={`/editor/${id}`}>
+                <Btn kind="ghost" size="sm" icon="pen">エディタ</Btn>
               </Link>
               {/* Work 2: noteで開く — copy + open note.com/notes/new */}
-              <button
+              <Btn
+                kind="accent"
+                size="sm"
+                iconRight="arrow-right"
                 onClick={handleNoteOpen}
-                className="flex items-center gap-1 text-[12px] font-sans text-paper bg-accent px-3 py-1 rounded-sm hover:brightness-90 transition-all"
               >
                 noteで開く
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-3.5 h-3.5">
-                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-              </button>
+              </Btn>
             </div>
           </div>
         </div>
@@ -335,23 +332,21 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
             </div>
           )}
 
-          <h1 className="font-serif text-[2.25rem] md:text-[2.5rem] font-medium text-ink leading-[1.25] mb-7">
+          <h1 className="font-serif text-[2rem] md:text-[2.5rem] font-medium text-ink leading-[1.3] tracking-[0.005em] mb-7">
             {article.output.selectedTitle}
           </h1>
 
           <div className="flex items-center gap-3 mb-10 pb-8 border-b border-rule">
             <div className="w-10 h-10 rounded-full bg-surface border border-rule flex items-center justify-center shrink-0 overflow-hidden">
-              <Tsumugi size={28} mood="idle" />
+              <TsumugiTiny size={28} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-sans font-medium text-ink">あなた</p>
-              <p className="text-[11px] font-mono text-mute mt-0.5">
+              <p className="text-[13px] font-sans font-medium text-ink leading-none">あなた</p>
+              <p className="text-[11px] font-mono text-mute mt-1.5 leading-none">
                 {publishedDate}&nbsp;·&nbsp;約{readTime}分
               </p>
             </div>
-            <button className="text-[12px] font-sans text-ink border border-rule px-4 py-1.5 rounded-full hover:bg-surface transition-colors shrink-0">
-              フォロー
-            </button>
+            <Btn kind="ghost" size="sm">フォロー</Btn>
           </div>
 
           <div className="nb" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
@@ -368,11 +363,12 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
         </div>
 
         {/* ── NOTE 準備ツール ── */}
-        <div className="border-t-2 border-rule bg-surface">
+        <div className="border-t border-rule bg-surface">
           <div className="max-w-[760px] mx-auto px-5 md:px-6 py-10">
-            <p className="font-mono text-[10px] tracking-widest text-mute uppercase mb-6">
-              NOTE 準備ツール
-            </p>
+            <SectionHead
+              kicker="NOTE 準備ツール"
+              title="貼り付け前の最終仕上げ"
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
               <div className="lg:col-span-2">
@@ -400,7 +396,7 @@ export default function PreviewPage({ params }: { params: Promise<{ id: string }
                 </Card>
 
                 {article.status === "copied" && (
-                  <div className="flex flex-col items-center gap-3 py-6 text-center bg-paper border border-rule rounded-md">
+                  <div className="flex flex-col items-center gap-3 py-6 text-center bg-paper border border-rule rounded-sm">
                     <Tsumugi size={52} mood="happy" />
                     <p className="text-sm font-serif text-mute">noteに貼り付け準備完了！</p>
                   </div>

@@ -3,7 +3,8 @@ import { useState } from "react";
 import { StyleConfig } from "@/types/style";
 import { ApiError } from "@/types/api";
 import { TextArea } from "@/components/ui/TextArea";
-import { Button } from "@/components/ui/Button";
+import { Btn } from "@/components/ui/Btn";
+import { Chip } from "@/components/ui/Chip";
 
 interface StyleAnalyzerProps {
   onApply: (style: StyleConfig) => Promise<void>;
@@ -64,28 +65,31 @@ export function StyleAnalyzer({ onApply }: StyleAnalyzerProps) {
       />
 
       <div className="flex items-center gap-3">
-        <Button
+        <Btn
+          kind="primary"
+          icon="sparkle"
           onClick={handleAnalyze}
-          isLoading={isAnalyzing}
-          disabled={text.trim().length < 100}
+          disabled={text.trim().length < 100 || isAnalyzing}
         >
-          AIで解析する
-        </Button>
+          {isAnalyzing ? "解析中…" : "AIで解析する"}
+        </Btn>
         {text.trim().length > 0 && text.trim().length < 100 && (
-          <span className="text-xs text-gray-400">{text.trim().length}/100文字</span>
+          <span className="font-mono text-[11px] text-mute-soft">{text.trim().length}/100文字</span>
         )}
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <p className="text-[13px] font-sans text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2">
           {error}
         </p>
       )}
 
       {analyzed && (
-        <div className="border border-blue-200 rounded-xl bg-blue-50 p-4 space-y-3">
-          <h3 className="font-semibold text-blue-900 text-sm">解析結果</h3>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <div className="bg-surface border border-rule rounded-sm p-4 space-y-3">
+          <p className="font-display text-[10px] tracking-[0.2em] text-accent uppercase leading-none">
+            ✦ 解析結果
+          </p>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
             <AnalyzeRow label="文体" value={FORMALITY_LABEL[analyzed.tone.formality]} />
             <AnalyzeRow label="ユーモア" value={HUMOR_LABEL[analyzed.tone.humor]} />
             <AnalyzeRow label="視点" value={PERSPECTIVE_LABEL[analyzed.tone.perspective]} />
@@ -98,26 +102,31 @@ export function StyleAnalyzer({ onApply }: StyleAnalyzerProps) {
             <AnalyzeRow label="目標文字数" value={`${analyzed.noteSpecific.targetLength}字`} />
           </dl>
           {analyzed.tone.description && (
-            <p className="text-sm text-blue-800 italic">&ldquo;{analyzed.tone.description}&rdquo;</p>
+            <p className="text-[13px] font-serif text-ink-soft italic leading-relaxed">
+              「<span className="bg-highlight px-1">{analyzed.tone.description}</span>」
+            </p>
           )}
           {analyzed.vocabulary.preferredExpressions.length > 0 && (
-            <div className="text-sm">
-              <span className="text-gray-600">よく使う表現: </span>
-              <span className="text-gray-900">{analyzed.vocabulary.preferredExpressions.join("、")}</span>
-            </div>
+            <p className="text-[12px] font-sans text-ink-soft leading-relaxed">
+              <span className="font-mono text-[10px] text-mute uppercase tracking-widest mr-1.5">よく使う表現</span>
+              {analyzed.vocabulary.preferredExpressions.join("、")}
+            </p>
           )}
           {analyzed.noteSpecific.hashTags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1.5 pt-1">
               {analyzed.noteSpecific.hashTags.map((tag) => (
-                <span key={tag} className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                  #{tag}
-                </span>
+                <Chip key={tag}>#{tag}</Chip>
               ))}
             </div>
           )}
-          <Button onClick={handleApply} isLoading={isApplying}>
-            このスタイルを適用する
-          </Button>
+          <Btn
+            kind="accent"
+            icon="check"
+            onClick={handleApply}
+            disabled={isApplying}
+          >
+            {isApplying ? "適用中…" : "このスタイルを適用する"}
+          </Btn>
         </div>
       )}
     </div>
@@ -127,8 +136,8 @@ export function StyleAnalyzer({ onApply }: StyleAnalyzerProps) {
 function AnalyzeRow({ label, value }: { label: string; value: string }) {
   return (
     <>
-      <dt className="text-gray-500">{label}</dt>
-      <dd className="font-medium text-gray-900">{value}</dd>
+      <dt className="font-mono text-[11px] text-mute uppercase tracking-[0.08em]">{label}</dt>
+      <dd className="font-sans text-[13px] text-ink">{value}</dd>
     </>
   );
 }
