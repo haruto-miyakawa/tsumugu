@@ -176,7 +176,7 @@ sequenceDiagram
 
 ```bash
 # 1. リポジトリをクローン
-git clone https://github.com/your-username/note-generator.git
+git clone https://github.com/haruto-miyakawa/note-generator.git
 cd note-generator
 
 # 2. 依存関係をインストール
